@@ -1,0 +1,11 @@
+# Baza klientów AutoSerwis
+# I;id;imię;nazwisko;telefon;email;stały(TAK/NIE)
+# F;id;imię;nazwisko;telefon;email;NIP;nazwa firmy
+I;1;Anna;Kowalska;601234567;anna.kowalska@gmail.com;TAK
+I;2;Piotr;Nowak;512987654;piotr.nowak@wp.pl;NIE
+F;3;Marek;Wiśniewski;+48600111222;biuro@transmar.pl;6762345678;TransMar Sp. z o.o.
+I;4;Katarzyna;Wójcik;798456123;;TAK
+F;5;Agnieszka;Kamińska;123456789;flota@kurierexpress.pl;9451234567;Kurier Express S.A.
+I;6;Tomasz;Lewandowski;665321987;tomek.lew@onet.pl;NIE
+I;7;Magdalena;Zielińska;507111333;magda.z@interia.pl;NIE
+F;8;Paweł;Szymański;222333444;p.szymanski@budpol.com.pl;5272001122;Bud-Pol

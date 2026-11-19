@@ -5,6 +5,8 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -431,6 +433,17 @@ public class Main {
             okno.getContentPane().setBackground(ROZ_MLECZNY);
             okno.setIconImage(ikonaSerca());
 
+            BazaKlientow bazaKlientow = new BazaKlientow(Paths.get("dane", "klienci.txt"));
+            try {
+                bazaKlientow.wczytaj();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Nie udało się wczytać bazy klientów:\n" + ex.getMessage(),
+                        "Błąd odczytu", JOptionPane.ERROR_MESSAGE);
+            }
+
+            CardLayout widoki = new CardLayout();
+            JPanel srodek = new JPanel(widoki);
+
             MagicznyPanel naglowek = new MagicznyPanel(new BorderLayout(),
                     new Color[]{ROZ_GORACY, ROZ, LAWENDA}, false, 26,
                     new Color[]{BIALY, ROZ_MLECZNY, LAWENDA_JASNA}, 1);
@@ -475,7 +488,17 @@ public class Main {
             };
 
             for (String nazwaPrzycisku : nazwyPrzyciskow) {
-                menu.add(new SerduszkowyPrzycisk(nazwaPrzycisku));
+                SerduszkowyPrzycisk przycisk = new SerduszkowyPrzycisk(nazwaPrzycisku);
+                przycisk.addActionListener(e -> {
+                    switch (nazwaPrzycisku) {
+                        case "Panel główny" -> widoki.show(srodek, "glowny");
+                        case "Klienci" -> widoki.show(srodek, "klienci");
+                        default -> JOptionPane.showMessageDialog(okno,
+                                "Moduł „" + nazwaPrzycisku + "” jest w przygotowaniu.",
+                                "AutoSerwis", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+                menu.add(przycisk);
             }
 
             menu.setPreferredSize(new Dimension(250, 600));
@@ -503,7 +526,8 @@ public class Main {
             JPanel karty = new JPanel(new GridLayout(2, 2, 22, 22));
             karty.setOpaque(false);
 
-            karty.add(stworzKarte("Klienci", "0",
+            JLabel liczbaKlientow = new JLabel(String.valueOf(bazaKlientow.liczba()));
+            karty.add(stworzKarte("Klienci", liczbaKlientow,
                     "Zarejestrowani klienci"));
 
             karty.add(stworzKarte("Samochody", "0",
@@ -520,14 +544,35 @@ public class Main {
 
             okno.add(naglowek, BorderLayout.NORTH);
             okno.add(menu, BorderLayout.WEST);
-            okno.add(panelGlowny, BorderLayout.CENTER);
+            MagicznyPanel widokKlientow = new MagicznyPanel(new BorderLayout(),
+                    new Color[]{ROZ_MLECZNY, new Color(255, 246, 251), LAWENDA_JASNA}, true, 34,
+                    new Color[]{ROZ_PUDROWY, LAWENDA, ROZ}, 4);
+            widokKlientow.setBorder(BorderFactory.createEmptyBorder(26, 30, 30, 30));
+            widokKlientow.add(new KlienciPanel(bazaKlientow,
+                    () -> liczbaKlientow.setText(String.valueOf(bazaKlientow.liczba()))), BorderLayout.CENTER);
+
+            srodek.add(panelGlowny, "glowny");
+            srodek.add(widokKlientow, "klienci");
+            okno.add(srodek, BorderLayout.CENTER);
 
             okno.setVisible(true);
+
+            if (!bazaKlientow.getOstrzezenia().isEmpty()) {
+                JOptionPane.showMessageDialog(okno,
+                        "Podczas wczytywania bazy klientów wystąpiły problemy:\n• "
+                                + String.join("\n• ", bazaKlientow.getOstrzezenia()),
+                        "Ostrzeżenie", JOptionPane.WARNING_MESSAGE);
+            }
         });
     }
 
     public static JPanel stworzKarte(
             String tytul, String liczba, String opis) {
+        return stworzKarte(tytul, new JLabel(liczba), opis);
+    }
+
+    public static JPanel stworzKarte(
+            String tytul, JLabel wartosc, String opis) {
 
         Color[] kolory = KOLORY_KART[licznikKart++ % KOLORY_KART.length];
         KartaPanel karta = new KartaPanel(kolory[0], kolory[1]);
@@ -536,7 +581,6 @@ public class Main {
         etykieta.setFont(czcionka(Font.BOLD, 18, "Segoe Print", "Comic Sans MS"));
         etykieta.setForeground(MALINA);
 
-        JLabel wartosc = new JLabel(liczba);
         wartosc.setFont(czcionka(Font.BOLD, 40, "Segoe Script", "Segoe Print", "Comic Sans MS"));
         wartosc.setForeground(ROZ_GORACY);
 

@@ -1,0 +1,7 @@
+build/
+out/
+*.jar
+*.ser
+raporty/
+.idea/
+*.iml
